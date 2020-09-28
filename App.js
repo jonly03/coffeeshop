@@ -95,7 +95,7 @@ class App extends React.Component {
         )}
         {this.state.userType === TYPES.barista && (
           <View>
-            <Text style={style.heading}>Queue</Text>
+            <Text style={styles.heading}>Queue</Text>
             {this.state.queue.length === 0 ? (
               <Text>No orders in the queue</Text>
             ) : (
