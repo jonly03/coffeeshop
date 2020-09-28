@@ -5,10 +5,9 @@ import { StyleSheet, Text, View } from "react-native";
 import { TYPES, MENU } from "./CONSTANTS";
 import NavButton from "./components/NavButton";
 import MenuList from "./components/MenuList";
+import QueueList from "./components/QueueList";
+import CounterList from "./components/CounterList";
 
-MENU.map((item) => {
-  console.log(item.name, item.prepTime);
-});
 class App extends React.Component {
   state = {
     queue: [],
@@ -34,18 +33,37 @@ class App extends React.Component {
     // Given that we only have 1 barista, we can just remove the first elt in the queue after its prep time is up and start tracking the progress for the next one up
     // But had we had more than one barista, this logic would need to be updated
 
-    setTimeout(() => {
+    this.itemPrepTimeoutId = setTimeout(() => {
       const offQueueItem = this.state.queue[0];
       this.setState({
         queue: [...this.state.queue.slice(1)],
-        counter: [...this.state.counter, offQueueItem],
+        counter: offQueueItem
+          ? [...this.state.counter, offQueueItem]
+          : [...this.state.counter],
       });
-    }, this.state.queue[0].prepTime);
+    }, this.state.queue[0].prepTime * 1000);
   };
+
+  trackPickup = () => {
+    // Orders are picked up every 3 seconds on average
+    this.orderPickupTimeoutId = setTimeout(() => {
+      this.setState({
+        counter: [...this.state.counter.slice(1)],
+      });
+    }, 3 * 1000);
+  };
+
+  componentWillUnmount() {
+    clearTimeout(this.itemPrepTimeoutId);
+  }
 
   render() {
     if (this.state.queue.length > 0) {
       this.trackPrep();
+    }
+
+    if (this.state.counter.length > 0) {
+      this.trackPickup();
     }
     return (
       <View style={styles.container}>
@@ -63,7 +81,6 @@ class App extends React.Component {
           />
         </View>
 
-        {/* show the counter to the customer and queue to the barista */}
         {this.state.userType === TYPES.customer && (
           <View>
             <MenuList menu={MENU} handleOrder={this.handleOrder} />
@@ -71,9 +88,25 @@ class App extends React.Component {
         )}
         {this.state.userType === TYPES.barista && (
           <View>
-            <Text>Hello, Barista</Text>
+            {this.state.queue.length === 0 ? (
+              <Text>No orders in the queue</Text>
+            ) : (
+              <View>
+                <QueueList queue={this.state.queue} />
+              </View>
+            )}
           </View>
         )}
+        {
+          // Show counter to both customer and barista. The barista can glance up to the counter to call out an order that hasn't been picked up yet
+          this.state.counter.length === 0 ? (
+            <Text>No orders on the counter</Text>
+          ) : (
+            <View>
+              <CounterList counter={this.state.counter} />
+            </View>
+          )
+        }
       </View>
     );
   }
