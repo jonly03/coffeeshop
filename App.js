@@ -68,26 +68,34 @@ class App extends React.Component {
     return (
       <View style={styles.container}>
         <View>
-          <Text>Welcome to Nelly's Coffee Shop!</Text>
+          <Text style={styles.title}>Welcome to Nelly's Coffee Shop!</Text>
         </View>
-        <View>
+        <View style={styles.navbuttons}>
           <NavButton
-            text={
-              this.state.userType === TYPES.customer
-                ? TYPES.barista
-                : TYPES.customer
+            style={
+              this.state.userType === TYPES.customer ? styles.activeNav : {}
             }
+            text={TYPES.customer}
+            handlePress={this.handleNavButtonOnPress}
+          />
+          <NavButton
+            style={
+              this.state.userType === TYPES.barista ? styles.activeNav : {}
+            }
+            text={TYPES.barista}
             handlePress={this.handleNavButtonOnPress}
           />
         </View>
 
         {this.state.userType === TYPES.customer && (
           <View>
+            <Text style={styles.heading}>Menu</Text>
             <MenuList menu={MENU} handleOrder={this.handleOrder} />
           </View>
         )}
         {this.state.userType === TYPES.barista && (
           <View>
+            <Text style={style.heading}>Queue</Text>
             {this.state.queue.length === 0 ? (
               <Text>No orders in the queue</Text>
             ) : (
@@ -97,16 +105,20 @@ class App extends React.Component {
             )}
           </View>
         )}
-        {
-          // Show counter to both customer and barista. The barista can glance up to the counter to call out an order that hasn't been picked up yet
-          this.state.counter.length === 0 ? (
-            <Text>No orders on the counter</Text>
-          ) : (
-            <View>
-              <CounterList counter={this.state.counter} />
-            </View>
-          )
-        }
+
+        <View>
+          <Text style={styles.heading}>Counter</Text>
+          {
+            // Show counter to both customer and barista. The barista can glance up to the counter to call out an order that hasn't been picked up yet
+            this.state.counter.length === 0 ? (
+              <Text>No orders on the counter</Text>
+            ) : (
+              <View>
+                <CounterList counter={this.state.counter} />
+              </View>
+            )
+          }
+        </View>
       </View>
     );
   }
@@ -117,7 +129,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-evenly",
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  navbuttons: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  activeNav: {
+    fontSize: 20,
+  },
+  heading: {
+    fontWeight: "bold",
   },
 });
 
